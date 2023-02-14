@@ -1,0 +1,19 @@
+{
+  "kind": "collectionType",
+  "collectionName": "clips",
+  "info": {
+    "singularName": "clip",
+    "pluralName": "clips",
+    "displayName": "Clip"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "clipData": {
+      "type": "customField",
+      "customField": "plugin::yt-clip-field.yt-clip-field"
+    }
+  }
+}
