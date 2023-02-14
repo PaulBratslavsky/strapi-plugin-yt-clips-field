@@ -1,11 +1,19 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import YouTube from "react-youtube";
+import styled from "styled-components";
 
-const YouTubePlayer = ({ videoId, videoUrl }) => {
+const YouTubePlayerWrapper = styled(YouTube)`
+  .youtube-iframe {
+    border-radius: 25px;
+    overflow: hidden;
+  }
+`;
+
+const YouTubePlayer = ({ videoId, callback, videoData }) => {
   const [player, setPlayer] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [clipStart, setClipStart] = useState(null);
-  const [clipEnd, setClipEnd] = useState(null);
+  const [clipStart, setClipStart] = useState(videoData?.start || 0);
+  const [clipEnd, setClipEnd] = useState(videoData?.end || 0);
   const [currentTime, setCurrentTime] = useState(0);
 
   const onReady = (event) => {
@@ -46,6 +54,7 @@ const YouTubePlayer = ({ videoId, videoUrl }) => {
   const setEnd = () => {
     // calculate if end is before start if so set new start
     setClipEnd(currentTime);
+    callback(clipStart, currentTime)
     player.pauseVideo();
   }
 
@@ -87,27 +96,43 @@ const YouTubePlayer = ({ videoId, videoUrl }) => {
     return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   }
 
+  const opts = {
+    height: '390',
+    width: '100%',
+    playerVars: {
+      // https://developers.google.com/youtube/player_parameters
+      controls: 0,
+    }
+  };
+
   return (
     <div>
-      <YouTube videoId={videoId} onReady={onReady} onStateChange={onStateChange} onProgress={onProgress} />
-      <input style={{ width: "100%" }} type="range" min="0" max={player?.getDuration()} value={currentTime} onChange={onSeekBarChange} disabled={clipEnd} />
+      <YouTubePlayerWrapper
+        iframeClassName={"youtube-iframe"}
+        videoId={videoId}
+        onReady={onReady}
+        onStateChange={onStateChange}
+        onProgress={onProgress}
+        opts={opts}
+      />
+      {!clipEnd && <input style={{ width: "100%" }} type="range" min="0" max={player?.getDuration()} value={currentTime} onChange={onSeekBarChange} disabled={clipEnd} />}
 
       <div style={{ display: "flex", justifyContent: "center" }}>
 
         {!clipEnd && <>
-          <button onClick={isPlaying ? pauseVideo : playVideo} >
+          <button type="button" onClick={isPlaying ? pauseVideo : playVideo} >
             {isPlaying ? "Pause" : "Play"}
           </button>
-          <button onClick={restartVideo}>Restart</button>
+          <button type="button" onClick={restartVideo}>Restart</button>
         </>}
 
 
 
-        {!clipStart && <button onClick={() => setStart(currentTime)}>Set Start: {clipStart && formatTime(clipStart) || formatTime(currentTime)}</button>}
-        {clipStart && !clipEnd && <button onClick={() => setEnd(currentTime)}>Set End: {clipEnd && formatTime(clipEnd) || formatTime(currentTime)}</button>}
+        {!clipStart && <button type="button" onClick={() => setStart(currentTime)}>Set Start: {clipStart && formatTime(clipStart) || formatTime(currentTime)}</button>}
+        {clipStart && !clipEnd && <button type="button" onClick={() => setEnd(currentTime)}>Set End: {clipEnd && formatTime(clipEnd) || formatTime(currentTime)}</button>}
 
-        {clipEnd && <> <button onClick={reset}>Reset</button>
-          <button onClick={playClip}>Play Clip</button></>}
+        {clipEnd && <> <button type="button" onClick={playClip}>Play Clip</button><button type="button" onClick={reset}>Reset</button>
+        </>}
 
       </div>
     </div>

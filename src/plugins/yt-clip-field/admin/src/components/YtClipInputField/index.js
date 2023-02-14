@@ -9,59 +9,43 @@ const JSONInputWrapper = styled(JSONInput)`
   cursor: default;
 `;
 
-const SliderWithInputs = () => {
-  const [start, setStart] = useState(0);
-  const [end, setEnd] = useState(5000);
+export default function YtClipInputField({ value, name, onChange }) {
 
-  const handleStartChange = (event) => {
-    const newStart = parseInt(event.target.value);
-    if (newStart < end) {
-      setStart(newStart);
-    }
-  };
+  const [videoData, setVideoData] = React.useState(value ? JSON.parse(value) : null);
+  const [videoUrl, setVideoUrl] = React.useState("https://www.youtube.com/watch?v=RFk8ZmIDrFM");
+  const [videoId, setVideoId] = React.useState("RFk8ZmIDrFM");
 
-  const handleEndChange = (event) => {
-    const newEnd = parseInt(event.target.value);
-    if (newEnd > start) {
-      setEnd(newEnd);
-    }
-  };
+  function handleVideoDataChange(start, end) {
+    setVideoData({
+      ...videoData,
+      start,
+      end,
+    });
+  }
+  const data = videoData ? JSON.stringify(videoData) : value;
+
+
 
   return (
     <div>
-      <input type="range" min={0} max={10000} value={start} onChange={handleStartChange} />
-      <input type="number" value={start} onChange={handleStartChange} />
-      <input type="range" min={0} max={10000} value={end} onChange={handleEndChange} />
-      <input type="number" value={end} onChange={handleEndChange} />
-    </div>
-  );
-};
-
-
-export default function YtClipInputField({ value, name, onChange }) {
-
-  const [videoData, setVideoData] = React.useState(JSON.stringify({
-    videoId: "",
-    videoUrl: "",
-    name: "",
-    start: 0,
-    end: 100,
-  }));
-
-  return (
-    <> 
-    <YouTubePlayer  videoId={"RFk8ZmIDrFM"} videoUrl={"https://www.youtube.com/watch?v=RFk8ZmIDrFM"} />
+      <YouTubePlayer
+        videoId={videoId}
+        videoUrl={videoUrl}
+        callback={handleVideoDataChange}
+        videoData={videoData}
+      />
 
       <JSONInputWrapper
         name={name}
-        value={value !== "null" ? value : videoData}
+        value={data}
+        disabled
         onChange={(json) => {
+          console.log(json, "json")
           onChange({ target: { name, value: json } });
         }}
       />
 
-      <SliderWithInputs />
 
-    </>
+    </div>
   );
 }
